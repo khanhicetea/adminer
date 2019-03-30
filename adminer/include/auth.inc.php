@@ -168,10 +168,20 @@ if (isset($_GET["username"])) {
 	check_invalid_login();
 	$connection = connect();
 	$driver = new Min_Driver($connection);
+
+	if (!is_object($connection)) {
+		$error = "Can't connect to server, please try again !";
+		page_header(lang('Login'), $error, null);
+		echo "<form action='' method='post'>\n";
+		$adminer->loginForm();
+		echo "</form>\n";
+		page_footer("auth");
+		exit;
+	}
 }
 
 $login = null;
-if (!is_object($connection) || ($login = $adminer->login($_GET["username"], get_password())) !== true) {
+if (($login = $adminer->login($_GET["username"], get_password())) !== true) {
 	$error = (is_string($connection) ? h($connection) : (is_string($login) ? $login : lang('Invalid credentials.')));
 	auth_error($error . (preg_match('~^ | $~', get_password()) ? '<br>' . lang('There is a space in the input password which might be the cause.') : ''));
 }
